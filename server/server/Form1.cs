@@ -42,11 +42,13 @@ namespace server
             listener = new TcpListener(IPAddress.Any, 12000);
             listenThread = new Thread(new ThreadStart(ListenForClients));
             listenThread.Start();
+            logger.logBind();
         }
 
         private void ListenForClients()
         {
             listener.Start();
+            //logger.logListen();
 
             while (workFlag)
             {
@@ -70,9 +72,9 @@ namespace server
 
             TcpClient tcpClient = (TcpClient)client;
             NetworkStream clientStream = tcpClient.GetStream();
-            //Socket socket = tcpClient.Client;
-            //IPEndPoint endpoint = (IPEndPoint)socket.RemoteEndPoint;
-            //IPAddress address = endpoint.Address;
+
+            countOfConnections++;
+            //logger.logNewConnection();
 
             byte[] message = new byte[5000];
             int bytes;
@@ -82,7 +84,7 @@ namespace server
                 try
                 {
                     bytes = clientStream.Read(message, 0, 5000);
-                    //залогировать
+                    //logger.logReceive(bytes);
                 }
                 catch
                 {
@@ -133,6 +135,7 @@ namespace server
 
             }
             tcpClient.Close();
+            //logger.logDisconnect();
 
         }
 
@@ -141,17 +144,16 @@ namespace server
 
             byte[] buffer = Encoding.UTF8.GetBytes(message);
             clientStream.Write(buffer, 0, buffer.Length);
-            //залогировать количество отправленных байт
+            //logger.logSend(buffer.Length);
             clientStream.Flush();
 
         }
 
         private void stopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("stop", "stop", MessageBoxButtons.OK);
             workFlag = false;
             listener.Stop();
-            //залогировать
+            logger.logCloseConnection(countOfConnections);
         }
     }
 }
