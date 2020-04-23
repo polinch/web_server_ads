@@ -31,28 +31,40 @@ namespace server
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            workFlag = false;
             Process.GetCurrentProcess().Kill();
             Close();
         }
 
         private void runToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            workFlag = true;
             listener = new TcpListener(IPAddress.Any, 12000);
-
+            listenThread = new Thread(new ThreadStart(ListenForClients));
+            listenThread.Start();
         }
 
-        private void ListenClients()
+        private void ListenForClients()
         {
             listener.Start();
 
             while (workFlag)
             {
-                TcpClient client = listener.AcceptTcpClient();
-
+                try
+                {
+                    TcpClient client = listener.AcceptTcpClient();
+                    Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClient));
+                    clientThread.Start(client);
+                }
+                catch (SocketException)
+                {
+                    break;
+                }
             }
 
         }
 
+        //функция вторичного потока
         private void HandleClient(object client)
         {
 
@@ -65,7 +77,7 @@ namespace server
             byte[] message = new byte[5000];
             int bytes;
 
-            while(true)
+            while(workFlag)
             {
                 try
                 {
@@ -78,7 +90,7 @@ namespace server
                 }
 
                 string messageFromClient = Encoding.UTF8.GetString(message, 0, bytes).Trim('\0');
-                string[] msg = messageFromClient.Split(' ');
+                string[] msg = messageFromClient.Split('*');
                 if (msg[0].Equals("GET"))
                 {
                     string tempStr;
@@ -116,6 +128,7 @@ namespace server
                     {
                         messageToClient = "Error";
                     }
+                    Echo(messageToClient, clientStream);
                 }
 
             }
@@ -135,6 +148,7 @@ namespace server
 
         private void stopToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            MessageBox.Show("stop", "stop", MessageBoxButtons.OK);
             workFlag = false;
             listener.Stop();
             //залогировать

@@ -41,7 +41,7 @@ namespace client
             {
                 port = Int32.Parse(textBox2.Text);
             }
-            catch (FormatException ex)
+            catch (FormatException)
             {
                 MessageBox.Show("Port is empty", "Error", MessageBoxButtons.OK);
                 return;
@@ -71,7 +71,7 @@ namespace client
 
         private void getAllAdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            sendMessage("get");
+            sendMessage("GET");
         }
 
         private void sendMessage(string message)
@@ -97,7 +97,7 @@ namespace client
                 MessageBox.Show("Field is empty", "Error", MessageBoxButtons.OK);
                 return;
             }
-            string message = "post " + title + " " + body;
+            string message = "POST*" + title + "*" + body;
             sendMessage(message);
         }
     }
