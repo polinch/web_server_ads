@@ -48,7 +48,6 @@ namespace server
         private void ListenForClients()
         {
             listener.Start();
-            //logger.logListen();
 
             while (workFlag)
             {
@@ -74,7 +73,6 @@ namespace server
             NetworkStream clientStream = tcpClient.GetStream();
 
             countOfConnections++;
-            //logger.logNewConnection();
 
             byte[] message = new byte[5000];
             int bytes;
@@ -84,7 +82,6 @@ namespace server
                 try
                 {
                     bytes = clientStream.Read(message, 0, 5000);
-                    //logger.logReceive(bytes);
                 }
                 catch
                 {
@@ -99,7 +96,7 @@ namespace server
                     string messageToClient = "";
                     try
                     {
-                        using (StreamReader sr = new StreamReader(workPath))
+                        using (StreamReader sr = new StreamReader(workPath, System.Text.Encoding.Default))
                         {
                             while ((tempStr = sr.ReadLine()) != null)
                             {
@@ -122,7 +119,7 @@ namespace server
                         {
                             sw.WriteLine(msg[1]);
                             sw.WriteLine(msg[2]);
-                            sw.WriteLine("--------------------------------------------");
+                            sw.WriteLine("***");
                         }
                         messageToClient = "Ad added";
                     }
@@ -135,7 +132,6 @@ namespace server
 
             }
             tcpClient.Close();
-            //logger.logDisconnect();
 
         }
 
@@ -144,7 +140,6 @@ namespace server
 
             byte[] buffer = Encoding.UTF8.GetBytes(message);
             clientStream.Write(buffer, 0, buffer.Length);
-            //logger.logSend(buffer.Length);
             clientStream.Flush();
 
         }
